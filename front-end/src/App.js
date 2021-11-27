@@ -8,37 +8,67 @@ import {
   InputLabel,
   TextField,
   Input,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Todo from "./Todo";
-import { readTodos, createTodos } from "./function/index";
+import { readTodos, createTodos, updateTodos } from "./function/index";
 import Preloader from "./components/Preloader";
 
 function App() {
   const [todo, setTodo] = useState({ title: "" }); //state for todo text
   const [input, setInput] = useState([]); //for input
   const [todos, setTodos] = useState(null);
+  const [currentId, setCuurrentId] = useState(0);
 
-  // const addTodo = (event)=>{
-  //   //restrict refresh
+  //display todo in input
+  useEffect(() => {
+    let currentTodo =
+      currentId != 0
+        ? todos.find((todo) => todo._id === currentId)
+        : { title: "" };
+    setTodo(currentTodo);
+  }, [currentId]);
 
-  //   event.preventDefault();
-  //   //will fire when new todo is added
-  //    setTodos([...todos,input])
-  //    setInput('')
-  // }
-
+  //showing the todo
   useEffect(() => {
     const fetchData = async () => {
       const result = await readTodos();
-      console.log("rse", result.data);
+
       setTodos(result.data);
     };
     fetchData();
+  }, [currentId]);
+
+  //intiziale claear content in input
+  const clear = () => {
+    setCuurrentId(0);
+    setTodo({ title: "" });
+  };
+  useEffect(() => {
+    const clearField = (e) => {
+      if (e.keyCode == 27) {
+        clear();
+      }
+    };
+    window.addEventListener("keydown", clearField);
+    return () => window.removeEventListener("keydown", clearField);
   }, []);
 
+  //onsubmit
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-    const result = await createTodos(todo);
+    if (currentId === 0) {
+      const result = await createTodos(todo);
+      setTodos([...todos, result]);
+      clear();
+    } else {
+      await updateTodos(currentId, todo);
+      clear();
+    }
   };
 
   return (
@@ -49,6 +79,7 @@ function App() {
           <FormControl>
             <InputLabel>✔️ Write a Todo</InputLabel>
             <Input
+              value={todo.title}
               onChange={(e) => setTodo({ ...todo, title: e.target.value })}
             />
           </FormControl>
@@ -66,9 +97,24 @@ function App() {
           <Preloader />
         ) : todos.length > 0 ? (
           <div>
-            {todos.map((todo) => (
-              <ul>{todo.title}</ul>
-            ))}
+            <List className="todo_list">
+              {todos.map((todo) => (
+                <ListItem
+                  key={todo._id}
+                  onClick={() => {
+                    setCuurrentId(todo._id);
+                  }}
+                >
+                  <ListItemText
+                    primary={todo.title}
+                    secondary="Dummy Deadline ⏰⏰🔔🔔"
+                  />
+                  <IconButton edge="end" aria-label="delete">
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
           </div>
         ) : (
           <div>

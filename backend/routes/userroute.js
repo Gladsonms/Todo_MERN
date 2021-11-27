@@ -1,27 +1,35 @@
-const router=require("express").Router()
+const router = require("express").Router();
 //const createTodos =require("../controller/Todo")
- const mongoose=require('mongoose');
- const Todo = require("../modals/Todo");
-router.get("/",async (req,res) =>{
-    try {
-        const todos= await Todo.find()
-     
+const mongoose = require("mongoose");
+const Todo = require("../modals/Todo");
+//getting all todo
+router.get("/", async (req, res) => {
+  try {
+    const todos = await Todo.find();
 
-        res.status(200).json(todos);
-    }
-    catch(error)
-    {
-        res.status(404).json({message:error.message})
-    }
-})
-router.post("/",async (req,res)=> {
-    const todo=new Todo(req.body)
-    try{
-        await todo.save();
-        res.status(201).json(todo)
-    }
-    catch( error) {
-        res.status(409).json({error:error.message})
-    }
-  })
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+///ading new todo
+router.post("/", async (req, res) => {
+  const todo = new Todo(req.body);
+  try {
+    await todo.save();
+    res.status(201).json(todo);
+  } catch (error) {
+    res.status(409).json({ error: error.message });
+  }
+});
+router.patch("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`this id ${id} si not valid`);
+  }
+  const todo = { title, content, _id };
+  await Todo.findByIdAndUpdate(id, todo, { new: true });
+  res.json(todo);
+});
 module.exports = router;
