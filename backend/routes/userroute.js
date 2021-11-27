@@ -23,13 +23,24 @@ router.post("/", async (req, res) => {
   }
 });
 router.patch("/:id", async (req, res) => {
+  console.log("inside update route");
   const { id } = req.params;
   const { title } = req.body;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).send(`this id ${id} si not valid`);
   }
-  const todo = { title, content, _id };
-  await Todo.findByIdAndUpdate(id, todo, { new: true });
+  const todo = { title };
+
+  const result = await Todo.findByIdAndUpdate(id, todo, { new: true });
+
   res.json(todo);
+});
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`this id ${id} si not valid`);
+  }
+  await Todo.findByIdAndRemove(id);
+  res.json({ message: "Todo delete Succefully" });
 });
 module.exports = router;

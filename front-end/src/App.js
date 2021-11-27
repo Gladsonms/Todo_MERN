@@ -6,7 +6,6 @@ import {
   Button,
   FormControl,
   InputLabel,
-  TextField,
   Input,
   List,
   ListItem,
@@ -14,9 +13,10 @@ import {
   IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import Todo from "./Todo";
+
 import { readTodos, createTodos, updateTodos } from "./function/index";
 import Preloader from "./components/Preloader";
+import { deleteTodos } from "./api";
 
 function App() {
   const [todo, setTodo] = useState({ title: "" }); //state for todo text
@@ -38,7 +38,7 @@ function App() {
     const fetchData = async () => {
       const result = await readTodos();
 
-      setTodos(result.data);
+      result && setTodos(result.data);
     };
     fetchData();
   }, [currentId]);
@@ -63,12 +63,20 @@ function App() {
     event.preventDefault();
     if (currentId === 0) {
       const result = await createTodos(todo);
-      setTodos([...todos, result]);
+      console.log("result --->", result);
+      setTodos([...todos, result.data]);
       clear();
     } else {
       await updateTodos(currentId, todo);
       clear();
     }
+  };
+
+  const removeTodo = async (id) => {
+    await deleteTodos(id);
+    const todosCopy = [...todos];
+    todosCopy.filter((todo) => todo._id !== id);
+    setTodos(todosCopy);
   };
 
   return (
@@ -109,9 +117,11 @@ function App() {
                     primary={todo.title}
                     secondary="Dummy Deadline ⏰⏰🔔🔔"
                   />
-                  <IconButton edge="end" aria-label="delete">
-                    <DeleteIcon />
-                  </IconButton>
+                  <button onClick={() => removeTodo(todo._id)}>
+                    <IconButton edge="end" aria-label="delete">
+                      <DeleteIcon />
+                    </IconButton>
+                  </button>
                 </ListItem>
               ))}
             </List>

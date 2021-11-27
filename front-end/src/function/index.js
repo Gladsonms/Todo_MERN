@@ -23,3 +23,10 @@ export const updateTodos = async (id, todo) => {
     console.log(error);
   }
 };
+export const deleteTodos = async (id) => {
+  try {
+    const data = await api.deleteTodos(id);
+  } catch (error) {
+    console.log(error);
+  }
+};
