@@ -43,4 +43,17 @@ router.delete("/:id", async (req, res) => {
   await Todo.findByIdAndRemove(id);
   res.json({ message: "Todo delete Succefully" });
 });
+router.post("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`this id ${id} si not valid`);
+  }
+  try {
+    await Todo.findByIdAndUpdate(id, { completed: true });
+    res.json({ message: "Task completed succesfully", completed: true });
+  } catch (error) {
+    console.error(error);
+  }
+});
 module.exports = router;

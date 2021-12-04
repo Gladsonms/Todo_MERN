@@ -13,16 +13,18 @@ import {
   IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DoneOutlineIcon from "@mui/icons-material/DoneOutline";
 
 import { readTodos, createTodos, updateTodos } from "./function/index";
 import Preloader from "./components/Preloader";
-import { deleteTodos } from "./api";
+import { deleteTodos, doneTodos } from "./api";
 
 function App() {
   const [todo, setTodo] = useState({ title: "" }); //state for todo text
   const [input, setInput] = useState([]); //for input
   const [todos, setTodos] = useState(null);
   const [currentId, setCuurrentId] = useState(0);
+  const [completetodo, setCompletedTodo] = useState(false);
 
   //display todo in input
   useEffect(() => {
@@ -63,7 +65,7 @@ function App() {
     event.preventDefault();
     if (currentId === 0) {
       const result = await createTodos(todo);
-      console.log("result --->", result);
+
       setTodos([...todos, result.data]);
       clear();
     } else {
@@ -77,6 +79,16 @@ function App() {
     const todosCopy = [...todos];
     todosCopy.filter((todo) => todo._id !== id);
     setTodos(todosCopy);
+  };
+  const completedTodo = async (id) => {
+    await doneTodos(id).then((res) => {
+      if (res.completed) {
+        setCompletedTodo(true);
+      }
+    });
+    // const finshed = [...todos];
+    // finshed.filter((todo) => todo._id !== id);
+    // setCompletedTodo(finshed);
   };
 
   return (
@@ -104,7 +116,7 @@ function App() {
         {!todos ? (
           <Preloader />
         ) : todos.length > 0 ? (
-          <div>
+          <div className="main_div">
             <List className="todo_list">
               {todos.map((todo) => (
                 <ListItem
@@ -117,11 +129,26 @@ function App() {
                     primary={todo.title}
                     secondary="Dummy Deadline ⏰⏰🔔🔔"
                   />
-                  <button onClick={() => removeTodo(todo._id)}>
+                  <button
+                    className="delete_btn"
+                    onClick={() => removeTodo(todo._id)}
+                  >
                     <IconButton edge="end" aria-label="delete">
                       <DeleteIcon />
                     </IconButton>
                   </button>
+                  {!todo.completed ? (
+                    <button
+                      className="completed_btn"
+                      onClick={() => completedTodo(todo._id)}
+                    >
+                      <IconButton edge="end" aris-label="complete">
+                        <DoneOutlineIcon />
+                      </IconButton>
+                    </button>
+                  ) : (
+                    <span>Completed</span>
+                  )}
                 </ListItem>
               ))}
             </List>
@@ -132,7 +159,7 @@ function App() {
           </div>
         )}
         <div>
-          <ul>ahjdshj</ul>
+          {/* <ul>ahjdshj</ul> */}
           {/* <ul>
          {todos.map(todo=>(
            <Todo text={todo}/>
